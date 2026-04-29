@@ -1,0 +1,762 @@
+{% extends "base.html" %} {% block title %}智能问答助手{% endblock %} {% block extra_css %}
+<style>
+    /* 聊天容器 */
+    .chat-container {
+        height: calc(100vh - 120px);
+        display: flex;
+        gap: 1rem;
+    }
+
+    /* 聊天侧边栏 */
+    .chat-sidebar {
+        width: 350px;
+        background: var(--card-bg);
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* 聊天主区域 */
+    .chat-main {
+        flex: 1;
+        background: var(--card-bg);
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* 会话列表 */
+    .session-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    /* 会话项 */
+    .session-item {
+        padding: 1.25rem;
+        margin-bottom: 0.75rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        background: rgba(124, 58, 237, 0.05);
+        border: 2px solid transparent;
+    }
+
+    .session-item:hover {
+        background: rgba(124, 58, 237, 0.1);
+        transform: translateX(5px);
+    }
+
+    .session-item.active {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.1));
+        border-color: var(--primary-color);
+    }
+
+    .session-item .session-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text-primary);
+    }
+
+    .session-item .session-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .session-item .session-delete {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+        background: white;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .session-item:hover .session-delete {
+        opacity: 1;
+    }
+
+    /* 聊天消息区域 */
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem;
+        scroll-behavior: smooth;
+        background: #f8fafc;
+    }
+
+    /* 聊天消息 */
+    .chat-message {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .chat-question {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        margin-left: 3rem;
+        border-top-left-radius: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
+    }
+
+    .chat-answer {
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        margin-right: 3rem;
+        border: 1px solid var(--border-color);
+        border-top-right-radius: 0.25rem;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    /* 聊天输入区域 */
+    .chat-input-area {
+        padding: 2rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--card-bg);
+    }
+
+    .chat-input-area .form-control {
+        border-radius: 1rem;
+        border: 2px solid var(--border-color);
+        padding: 1.25rem;
+        resize: none;
+        transition: all 0.3s ease;
+        min-height: 100px;
+    }
+
+    .chat-input-area .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    }
+
+    .chat-input-area .btn {
+        border-radius: 1rem;
+        padding: 1rem 2.5rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .chat-input-area .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 空状态 */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        color: var(--primary-color);
+        opacity: 0.5;
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1.125rem;
+        margin-bottom: 0;
+    }
+
+    /* 侧边栏按钮 */
+    .chat-sidebar .btn {
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .chat-sidebar .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+    }
+
+    .chat-sidebar .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 知识库选择器 */
+    .chat-main .form-select {
+        border-radius: 0.75rem;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .chat-main .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 992px) {
+        .chat-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-sidebar {
+            width: 100%;
+            max-height: 250px;
+        }
+
+        .chat-message {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="chat-container">
+    <!-- 左侧：会话管理 -->
+    <div class="chat-sidebar">
+        <div class="p-4 border-bottom">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-chat-left-text"></i> 对话管理</h5>
+                <button class="btn btn-sm btn-primary" onclick="createNewSession()"><i class="bi bi-plus"></i> 新建对话</button>
+            </div>
+            <button class="btn btn-sm btn-outline-danger w-100" onclick="clearAllSessions()"><i class="bi bi-trash"></i> 清空所有会话</button>
+        </div>
+        <div class="session-list" id="sessionList">
+            <div class="text-center text-muted py-8">
+                <i class="bi bi-chat-left-text" style="font-size: 3rem"></i>
+                <p class="mt-3">暂无对话记录</p>
+                <p class="text-sm">点击上方按钮开始新对话</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧：对话页面 -->
+    <div class="chat-main">
+        <div class="p-4 border-bottom" style="padding: 1rem!important;">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-chat-dots"></i> 智能对话</h5>
+                <select class="form-select form-select-sm" id="kbSelect" style="width: 220px" onchange="onKbChange()">
+                    <option value="">-- 选择知识库 --</option>
+                    {% for kb in knowledgebases %}
+                    <option value="{{ kb.id }}">{{ kb.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="empty-state">
+                <i class="bi bi-brain"></i>
+                <p>开始与智能助手对话吧！</p>
+                <p class="text-sm mt-2">您可以询问任何问题，或选择知识库获取更精准的回答</p>
+            </div>
+        </div>
+
+        <div class="chat-input-area" style="padding: 10px; border: unset; height: 80px">
+            <form id="chatForm" style="display: flex; justify-content: space-between" onsubmit="askQuestion(event)">
+                <div class="mb-3" style="flex: 1">
+                    <!-- <textarea style="padding: 5px" class="form-control" id="questionInput" rows="1" placeholder="输入您的问题..." required></textarea> -->
+                    <input style="padding: 5px;min-height: 60px;" class="form-control" id="questionInput" placeholder="输入您的问题..." required></input>
+                </div>
+                <div class="d-flex justify-content-end" style="padding-left: 10px; width: 150px; height: 60px">
+                    <button type="submit" class="btn btn-primary" id="submitBtn"><i class="bi bi-send"></i> 发送消息</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+    //定义一个变量记录完整的回答内容
+    let fullAnswer = "";
+    //标记渲染任务是否挂起,这是为了防止重复渲染
+    let pendingUpdate = false;
+    //当前会话的ID,初始化为null,表示暂时未选择任何会话
+    let currentSessionId = null;
+    //会话列表,初始为空数组,用于存储所有的会话对象
+    let sessions = [];
+    //当前知识库的ID，初始值为null,表示没有选择任何的知识库
+    let currentKbId = null;
+    //为字符串进行HTML转义，防止XSS攻击
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    function scrollToBottom() {
+        //获取消息聊天区域的容器元素
+        const chatMessages = document.getElementById("chatMessages");
+        //设置滚动条的位置到底部
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    function renderMarkdownToElement(element, text) {
+        if (!text) {
+            element.innerHTML = '<i class="bi bi-hourglass-split"></i> 正在思考...';
+            return;
+        }
+        element.innerHTML = marked.parse(text);
+    }
+    // 用于格式化时间字符串为友好显示
+    function formatTime(timeStr) {
+        // 如果无有效时间，直接返回空字符串
+        if (!timeStr) return "";
+        // 将字符串转换为Date对象
+        const date = new Date(timeStr);
+        // 获取当前时间
+        const now = new Date();
+        // 计算时间差（毫秒）
+        const diff = now - date;
+        // 换算为分钟数
+        const minutes = Math.floor(diff / 60000);
+        // 换算为小时数
+        const hours = Math.floor(diff / 3600000);
+        // 换算为天数
+        const days = Math.floor(diff / 86400000);
+        // 1分钟内显示“刚刚”
+        if (minutes < 1) return "刚刚";
+        // 1小时内显示“x分钟前”
+        if (minutes < 60) return `${minutes}分钟前`;
+        // 24小时内显示“x小时前”
+        if (hours < 24) return `${hours}小时前`;
+        // 7天内显示“x天前”
+        if (days < 7) return `${days}天前`;
+        // 超过7天显示具体日期
+        return date.toLocaleDateString();
+    }
+    async function clearChatMessages(params) {
+        document.getElementById("chatMessages").innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-brain"></i>
+                <p>开始与智能助手对话吧！</p>
+                <p class="text-sm mt-2">您可以询问任何问题，或选择知识库获取更精准的回答</p>
+            </div>
+        `;
+    }
+    async function clearAllSessions() {
+        if (!confirm("确定要删除所有会话吗?此操作不可恢复!")) return;
+        try {
+            const response = await fetch(`/api/v1/sessions`, { method: "DELETE" });
+            const result = await response.json();
+            //如果返回状态码为200,说明删除会话成功,
+            if (result.code == 200) {
+                currentSessionId = null;
+                clearChatMessages();
+                await loadSessions();
+            } else {
+                alert("删除会话失败:" + result.message);
+            }
+        } catch (error) {
+            alert("删除会话失败:" + error.message);
+        }
+    }
+    async function deleteSession(sessionId) {
+        if (!confirm("确定要删除这个会话吗?此操作不可恢复!")) return;
+        try {
+            const response = await fetch(`/api/v1/sessions/${sessionId}`, { method: "DELETE" });
+            const result = await response.json();
+            //如果返回状态码为200,说明删除会话成功,
+            if (result.code == 200) {
+                //如果删除的是当前会话的话,清除当前的会话ID和聊天信息
+                if (currentSessionId == sessionId) {
+                    currentSessionId = null;
+                    clearChatMessages();
+                }
+                await loadSessions();
+            } else {
+                alert("删除会话失败:" + result.message);
+            }
+        } catch (error) {
+            alert("删除会话失败:" + error.message);
+        }
+    }
+    async function renderSessions() {
+        const sessionList = document.getElementById("sessionList");
+        if (sessions.length == 0) {
+            sessionList.innerHTML = `
+                <div class="text-center text-muted py-8">
+                    <i class="bi bi-chat-left-text" style="font-size: 3rem;"></i>
+                    <p class="mt-3">暂无对话记录</p>
+                    <p class="text-sm">点击上方按钮开始新对话</p>
+                </div>
+            `;
+        }
+        // 遍历sessions并渲染为会话项
+        sessionList.innerHTML = sessions
+            ?.map(
+                (session) => `
+       <div class="session-item ${session.id === currentSessionId ? "active" : ""}" 
+            onclick="loadSession('${session.id}')">
+           <button class="btn btn-sm btn-link text-danger p-0 session-delete" 
+                   onclick="event.stopPropagation(); deleteSession('${session.id}')">
+               <i class="bi bi-x-lg"></i>
+           </button>
+           <div class="session-title">${session.title || "新对话"}</div>
+           <div class="session-time">${formatTime(session.updated_at)}</div>
+       </div>
+   `,
+            )
+            .join("");
+    }
+    function renderMarkdown(text) {
+        return marked.parse(text);
+    }
+    // 渲染消息
+    function renderMessages(messages) {
+        const chatMessages = document.getElementById("chatMessages");
+
+        if (messages.length === 0) {
+            chatMessages.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-brain"></i>
+                <p>开始与智能助手对话吧！</p>
+                <p class="text-sm mt-2">您可以询问任何问题，或选择知识库获取更精准的回答</p>
+            </div>
+        `;
+            return;
+        }
+
+        chatMessages.innerHTML = messages
+            ?.map((msg) => {
+                if (msg.role === "user") {
+                    return `
+                <div class="chat-message chat-question">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <strong><i class="bi bi-person-circle"></i> 我的问题:</strong>
+                            <div class="mt-2">${escapeHtml(msg.content)}</div>
+                        </div>
+                        <small class="text-white opacity-75">${formatTime(msg.created_at)}</small>
+                    </div>
+                </div>
+            `;
+                } else {
+                    return `
+                <div class="chat-message chat-answer">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <strong><i class="bi bi-robot"></i> 智能回答:</strong>
+                            <div class="mt-2 markdown-content">${renderMarkdown(msg.content)}</div>
+                        </div>
+                        <small class="text-muted">${formatTime(msg.created_at)}</small>
+                    </div>
+                </div>
+            `;
+                }
+            })
+            .join("");
+
+        scrollToBottom();
+    }
+    async function loadSession(sessionId) {
+        try {
+            const response = await fetch(`/api/v1/sessions/${sessionId}`);
+            const result = await response.json();
+            //如果返回状态码为200,说明创建会话成功,切换到新的会话
+            if (result.code == 200) {
+                //设置当前会话的ID为传入的sessionId
+                currentSessionId = sessionId;
+                //会话对象
+                const session = result.data.session;
+                //此会话对应的消息列表
+                const messages = result.data.messages || [];
+                //将消息列表渲染到页面上
+                renderMessages(messages);
+                await loadSessions();
+            }
+        } catch (error) {
+            alert("加载会话列表失败:" + error.message);
+        }
+    }
+    async function loadSessions() {
+        try {
+            const response = await fetch("/api/v1/sessions");
+            const result = await response.json();
+            //如果返回状态码为200,说明创建会话成功,切换到新的会话
+            if (result.code == 200) {
+                sessions = result.data.items || [];
+                renderSessions();
+            }
+        } catch (error) {
+            alert("加载会话列表失败:" + error.message);
+        }
+    }
+    async function createNewSession() {
+        try {
+            const response = await fetch("/api/v1/sessions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+            });
+            const result = await response.json();
+            //如果返回状态码为200,说明创建会话成功,切换到新的会话
+            if (result.code == 200) {
+                currentSessionId = result.data.id;
+                //重新加载最新的会话列表
+                await loadSessions();
+                //清空聊天消息
+                //clearChatMessages()
+            }
+        } catch (error) {
+            alert("创建会话失败:" + error.message);
+        }
+    }
+
+    async function askQuestion(event) {
+        event.preventDefault();
+        const question = document.getElementById("questionInput").value.trim();
+        const chatMessages = document.getElementById("chatMessages");
+        if (!question) return;
+        //如果开始提问的时候没有会话,我们就创建一个新的会话
+        if (!currentSessionId) {
+            await createNewSession();
+        }
+        if (chatMessages.querySelector(".empty-state")) {
+            chatMessages.innerHTML = "";
+        }
+        const questionDiv = document.createElement("div");
+        questionDiv.className = "chat-message chat-question";
+        // 构建用户气泡内容含图标、文本和时间
+        questionDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+                <strong><i class="bi bi-person-circle"></i> 我的问题:</strong>
+                <div class="mt-2">${escapeHtml(question)}</div>
+            </div>
+            <small class="text-white opacity-75">${new Date().toLocaleTimeString()}</small>
+        </div>
+        `;
+        chatMessages.appendChild(questionDiv);
+
+        //创建用于显示答案的DIV元素
+        const answerDiv = document.createElement("div");
+        answerDiv.className = "chat-message chat-answer";
+        //动态生成唯一答案的内容div id 用于唯一标识
+        const answerContentId = `answerContent_` + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+        const answerContent = document.createElement("div");
+        answerContent.className = "mt-2 markdown-content";
+        answerContent.id = answerContentId;
+        // 答案div显示机器人图标和时间
+        answerDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <strong><i class="bi bi-robot"></i> 智能回答:</strong>
+                </div>
+                <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+            </div>
+        `;
+        const flexGrowDiv = answerDiv.querySelector(".flex-grow-1");
+        flexGrowDiv.appendChild(answerContent);
+        chatMessages.appendChild(answerDiv);
+
+        function scheduleRender() {
+            //如果当前无待渲染的任务才会进行渲染
+            //这其实就是一个节流的函数
+            if (!pendingUpdate) {
+                pendingUpdate = true;
+                //在下一帧渲染
+                requestAnimationFrame(() => {
+                    renderMarkdownToElement(answerContent, fullAnswer);
+                    pendingUpdate = false;
+                    scrollToBottom();
+                });
+            }
+        }
+        document.getElementById("questionInput").value = "";
+        scrollToBottom();
+
+        try {
+            const url = currentKbId ? `/api/v1/knowledgebases/${currentKbId}/chat` : `/api/v1/chat`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    question: question, //每次提问的时候要携带当前的会话ID
+                    session_id: currentSessionId,
+                    stream: true,
+                }),
+            });
+            if (!response.ok) throw new Error("请求聊天失败");
+            //使用ReadableStream reader 获取response流
+            const reader = response.body.getReader();
+            // 使用TextDecoder解码服务器返回的二进制数据
+            const decoder = new TextDecoder();
+            //构建一个数据缓存区(字符串)
+            let buffer = "";
+            //重新加载会话列表以更新标题
+            await loadSessions();
+            while (true) {
+                //逐步读取一段数据
+                const { done, value } = await reader.read();
+                //如果读完了则结束循环
+                if (done) break;
+                //本块新数据解码为字符串，并追加加buffer
+                buffer += decoder.decode(value, { stream: true });
+                //按行切分，多行分别处理
+                const lines = buffer.split("\n");
+                //最后一行一般为数据残留，不处理，等下次处理
+                buffer = lines.pop() || "";
+                //处理每一行
+                for (const line of lines) {
+                    //如果这一行数据是以data: 开头的话，说明这是一个有效的SSE的数据包
+                    if (line.startsWith("data: ")) {
+                        //去除前缀，留下JSON内容
+                        const data = line.slice(6);
+                        //如果返回的是[DONE],仅跳过
+                        if (data == "[DONE]") continue;
+                        const chunk = JSON.parse(data);
+                        //如果类型为开始，为流的开始，要清空内容
+                        if (chunk.type == "start") {
+                            fullAnswer = "";
+                            answerContent.innerHTML = '<i class="bi bi-hourglass-split"></i> 正在思考...';
+                        } else if (chunk.type == "content") {
+                            fullAnswer += chunk.content;
+                            scheduleRender();
+                        } else if (chunk.type == "done") {
+                            //当回答完成之后
+                            renderMarkdownToElement(answerContent, fullAnswer);
+                            renderSources(chunk.sources, chunk.metadata, answerDiv, currentKbId);
+                        } else if (chunk.type == "error") {
+                            answerContent.innerHTML = `<div class="alert alert-danger">${chunk.content}</div>`;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            answerContent.innerHTML = `<div class="alert alert-danger"><strong>错误:</strong> ${error.message}</div>`;
+        }
+        scrollToBottom();
+    }
+    function renderSources(sources, metadata, answerDiv, currentKbId) {
+        const html = generateSourcesHTML(sources, metadata, currentKbId);
+        if (html) {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+            while (tempDiv.firstChild) {
+                answerDiv.appendChild(tempDiv.firstChild);
+            }
+        }
+    }
+    function generateSourcesHTML(sources, metadata, currentKbId) {
+        const sourcesHTML = sources
+            ?.map((source, idx) => {
+                const scores = [];
+                const retrieval_type = source.retrieval_type;
+                const rerank_score = source.rerank_score;
+                const vector_score = source.vector_score;
+                const keyword_score = source.keyword_score;
+                const rrf_score = source.rrf_score;
+                const chunk_id = source.chunk_id;
+                const doc_id = source.doc_id;
+                const doc_name = source.doc_name;
+                const content = source.content;
+                //判断是否是向量检索
+                const isVector = retrieval_type.includes("vector");
+                //判断是否是关键字检索
+                const isKeyword = retrieval_type.includes("keyword");
+                //判断是否是混合检索
+                const isHybrid = retrieval_type.includes("hybrid");
+
+                if (isHybrid) {
+                    scores.push(`<span  class="badge bg-info me-1">向量:${vector_score}</span>`);
+                    scores.push(`<span class="badge bg-success me-1">关键词:${keyword_score}</span>`);
+                    scores.push(`<span class="badge bg-primary me-1">融合:${rrf_score}</span>`);
+                } else if (isVector) {
+                    scores.push(`<span class="badge bg-info me-1" >向量:${vector_score}</span>`);
+                } else if (isKeyword) {
+                    scores.push(`<span class="badge bg-success me-1">关键词:${keyword_score}</span>`);
+                }
+                scores.push(`<span class="badge bg-danger me-1">重排序:${rerank_score}</span>`);
+                // 返回单个引用块的 html 字符串
+                return `
+               <div class="source-item mb-3">
+                   <div class="fw-bold mb-1">
+                       <i class="bi bi-file-earmark"></i> 参考来源 ${idx + 1}: ${doc_name || "未知文档"}
+                   </div>
+                   <div class="mb-2">
+                       ${scores.length > 0 ? scores.join("") : '<span class="text-muted small">暂无分数信息</span>'}
+                   </div>
+                   <div class="small text-muted">
+                       <strong>相关内容：</strong>
+                       <div class="mt-1 p-3 bg-light rounded" style="max-height: 150px; overflow-y: auto; font-size: 0.9em;">
+                           ${escapeHtml(content || "")}
+                       </div>
+                   </div>
+               </div>
+           `;
+            })
+            .join("");
+        if (!sourcesHTML) return "";
+        // 返回所有引用来源的 html 块
+        return `
+           <div class="mt-4 p-4 bg-light rounded">
+               <strong><i class="bi bi-link-45deg"></i> 参考来源 (${sources?.length} 个):</strong>
+               <div class="mt-3">
+                   ${sourcesHTML}
+               </div>
+           </div>
+       `;
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        loadSessions();
+        if (typeof marked !== "undefined") {
+            // 配置 marked.js 的渲染选项
+            marked.setOptions({
+                // 启用软换行
+                breaks: true,
+                // 启用 Github Flavored Markdown
+                gfm: true,
+                // 禁用标题自动生成 id
+                headerIds: false,
+                // 禁用混淆处理
+                mangle: false,
+            });
+        }
+    });
+    async function onKbChange() {
+        currentKbId = document.getElementById("kbSelect").value;
+        //如果当前已经在一个会话了，那么就创建一个新的会话
+        if (currentSessionId) {
+            await createNewSession();
+        }
+        //启用发送按钮
+        document.getElementById("submitBtn").disabled = false;
+    }
+</script>
+{% endblock %}

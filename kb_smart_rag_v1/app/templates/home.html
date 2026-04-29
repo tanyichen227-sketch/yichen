@@ -1,0 +1,260 @@
+{% extends "base.html" %} {% block title %}首页 - 智能问答助手{% endblock %} {% block extra_css %}
+<style>
+    /* 首页样式 */
+    .home-section {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* 英雄区域 */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-radius: 1.5rem;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(124, 58, 237, 0.2);
+        margin-bottom: 3rem;
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-section p {
+        font-size: 1.25rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.95;
+    }
+
+    .hero-section .btn {
+        padding: 1rem 2.5rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .hero-section .btn-primary {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+    }
+
+    .hero-section .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-section .btn-secondary {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+
+    .hero-section .btn-secondary:hover {
+        background: white;
+        color: var(--primary-color);
+        transform: translateY(-3px);
+    }
+
+    /* 特性卡片 */
+    .feature-section {
+        margin-bottom: 3rem;
+    }
+
+    .feature-card {
+        background: var(--card-bg);
+        border: none;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        padding: 2.5rem;
+        text-align: center;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card .icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .icon {
+        transform: scale(1.1);
+    }
+
+    .feature-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .feature-card p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    /* 快速开始区域 */
+    .quickstart-section {
+        background: rgba(124, 58, 237, 0.05);
+        border-radius: 1.5rem;
+        padding: 3rem;
+    }
+
+    .quickstart-section h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+    }
+
+    .quickstart-steps {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .step-item h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .step-item p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 3rem 1.5rem;
+        }
+
+        .hero-section h1 {
+            font-size: 2.25rem;
+        }
+
+        .feature-card {
+            padding: 2rem;
+        }
+
+        .quickstart-steps {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .quickstart-section {
+            padding: 2rem;
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="home-section">
+    <!-- 英雄区域 -->
+    <div class="hero-section">
+        <h1><i class="bi bi-brain"></i> 智能问答助手</h1>
+        <p>基于先进的 RAG（检索增强生成）技术，为您提供精准的知识问答服务</p>
+        <div class="d-flex justify-content-center gap-4">
+            <a href="/kb" class="btn btn-primary"> <i class="bi bi-collection"></i> 知识库管理 </a>
+            <a href="/chat" class="btn btn-secondary"> <i class="bi bi-chat-dots"></i> 开始聊天 </a>
+        </div>
+    </div>
+
+    <!-- 功能特性 -->
+    <!-- <div class="feature-section">
+        <h2 class="text-center mb-4">核心功能</h2>
+        <div class="row gap-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <h3>多格式文档支持</h3>
+                    <p>支持 PDF、DOCX、TXT、MD 等多种格式文档的上传和管理，满足不同场景的需求</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h3>智能向量检索</h3>
+                    <p>基于向量相似度的智能文档检索，快速定位相关内容，提高信息获取效率</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <h3>智能问答</h3>
+                    <p>基于文档内容的智能问答，支持流式输出和 Markdown 渲染，提供流畅的交互体验</p>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- 快速开始 -->
+    <div class="quickstart-section">
+        <h2 class="text-center">快速开始</h2>
+        <div class="quickstart-steps">
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <h3>创建知识库</h3>
+                <p>在知识库管理页面创建新的知识库，设置分块参数和检索参数</p>
+            </div>
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <h3>上传文档</h3>
+                <p>在知识库详情页面上传文档，系统会自动解析、分块和向量化</p>
+            </div>
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <h3>开始问答</h3>
+                <p>在聊天页面选择知识库，输入问题即可获得基于文档内容的智能回答</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

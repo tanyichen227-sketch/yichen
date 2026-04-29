@@ -1,0 +1,6 @@
+[mysqld]
+port=3307
+bind-address=127.0.0.1
+datadir=D:\code\KnowledgeRAG-GZHU-master\KnowledgeRAG-GZHU-master\.local-mysql\data
+mysqlx=0
+log-error=D:\code\KnowledgeRAG-GZHU-master\KnowledgeRAG-GZHU-master\.local-mysql\mysqld-3307.err.log

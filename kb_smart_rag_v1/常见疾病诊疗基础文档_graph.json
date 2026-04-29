@@ -1,0 +1,312 @@
+{
+  "nodes": [
+    {
+      "id": "代谢性疾病",
+      "label": "疾病",
+      "type": "概念"
+    },
+    {
+      "id": "糖尿病",
+      "label": "疾病",
+      "type": "人物"
+    },
+    {
+      "id": "1型糖尿病",
+      "label": "疾病亚类",
+      "type": "概念"
+    },
+    {
+      "id": "2型糖尿病",
+      "label": "疾病亚类",
+      "type": "概念"
+    },
+    {
+      "id": "心血管疾病",
+      "label": "疾病",
+      "type": "概念"
+    },
+    {
+      "id": "高血压",
+      "label": "疾病",
+      "type": "人物"
+    },
+    {
+      "id": "呼吸系统疾病",
+      "label": "疾病",
+      "type": "概念"
+    },
+    {
+      "id": "肺炎",
+      "label": "疾病",
+      "type": "人物"
+    },
+    {
+      "id": "症状1",
+      "label": "症状",
+      "type": "概念"
+    },
+    {
+      "id": "头痛",
+      "label": "症状",
+      "type": "人物"
+    },
+    {
+      "id": "发热",
+      "label": "症状",
+      "type": "人物"
+    },
+    {
+      "id": "咳嗽",
+      "label": "症状",
+      "type": "人物"
+    },
+    {
+      "id": "药物1",
+      "label": "药物",
+      "type": "概念"
+    },
+    {
+      "id": "胰岛素",
+      "label": "药物",
+      "type": "人物"
+    },
+    {
+      "id": "⼆甲双胍",
+      "label": "药物",
+      "type": "概念"
+    },
+    {
+      "id": "降压药",
+      "label": "药物",
+      "type": "人物"
+    },
+    {
+      "id": "硝苯地平",
+      "label": "药物",
+      "type": "人物"
+    },
+    {
+      "id": "氨氯地平",
+      "label": "药物",
+      "type": "人物"
+    },
+    {
+      "id": "缬沙坦",
+      "label": "药物",
+      "type": "人物"
+    },
+    {
+      "id": "⻘霉素",
+      "label": "药物",
+      "type": "概念"
+    },
+    {
+      "id": "头孢类抗⽣素",
+      "label": "药物",
+      "type": "概念"
+    },
+    {
+      "id": "布洛芬",
+      "label": "药物",
+      "type": "人物"
+    },
+    {
+      "id": "对⼄酰氨基酚",
+      "label": "药物",
+      "type": "概念"
+    },
+    {
+      "id": "检查项1",
+      "label": "检查项目",
+      "type": "概念"
+    },
+    {
+      "id": "⾎糖检测",
+      "label": "检查项目",
+      "type": "概念"
+    }
+  ],
+  "edges": [
+    {
+      "source": "代谢性疾病",
+      "target": "糖尿病",
+      "label": "包含"
+    },
+    {
+      "source": "糖尿病",
+      "target": "1型糖尿病",
+      "label": "亚类"
+    },
+    {
+      "source": "糖尿病",
+      "target": "2型糖尿病",
+      "label": "亚类"
+    },
+    {
+      "source": "心血管疾病",
+      "target": "高血压",
+      "label": "包含"
+    },
+    {
+      "source": "症状1",
+      "target": "头痛",
+      "label": "引起"
+    },
+    {
+      "source": "症状1",
+      "target": "发热",
+      "label": "引起"
+    },
+    {
+      "source": "症状1",
+      "target": "咳嗽",
+      "label": "引起"
+    },
+    {
+      "source": "药物1",
+      "target": "胰岛素",
+      "label": "治疗"
+    },
+    {
+      "source": "药物1",
+      "target": "⼆甲双胍",
+      "label": "治疗"
+    },
+    {
+      "source": "降压药",
+      "target": "硝苯地平",
+      "label": "治疗"
+    },
+    {
+      "source": "降压药",
+      "target": "氨氯地平",
+      "label": "治疗"
+    },
+    {
+      "source": "降压药",
+      "target": "缬沙坦",
+      "label": "治疗"
+    },
+    {
+      "source": "药物1",
+      "target": "⻘霉素",
+      "label": "治疗"
+    },
+    {
+      "source": "药物1",
+      "target": "头孢类抗⽣素",
+      "label": "治疗"
+    },
+    {
+      "source": "药物1",
+      "target": "布洛芬",
+      "label": "治疗"
+    },
+    {
+      "source": "药物1",
+      "target": "对⼄酰氨基酚",
+      "label": "治疗"
+    },
+    {
+      "source": "检查项1",
+      "target": "⾎糖检测",
+      "label": "关联"
+    },
+    {
+      "source": "代谢性疾病",
+      "target": "糖尿病",
+      "label": "相关"
+    },
+    {
+      "source": "1型糖尿病",
+      "target": "⼆甲双胍",
+      "label": "相关"
+    },
+    {
+      "source": "⼆甲双胍",
+      "target": "糖尿病",
+      "label": "相关"
+    },
+    {
+      "source": "糖尿病",
+      "target": "胰岛素",
+      "label": "相关"
+    },
+    {
+      "source": "⾎糖检测",
+      "target": "糖尿病",
+      "label": "相关"
+    },
+    {
+      "source": "硝苯地平",
+      "target": "氨氯地平",
+      "label": "相关"
+    },
+    {
+      "source": "氨氯地平",
+      "target": "降压药",
+      "label": "相关"
+    },
+    {
+      "source": "降压药",
+      "target": "缬沙坦",
+      "label": "相关"
+    },
+    {
+      "source": "缬沙坦",
+      "target": "头痛",
+      "label": "相关"
+    },
+    {
+      "source": "呼吸系统疾病",
+      "target": "肺炎",
+      "label": "相关"
+    },
+    {
+      "source": "头孢类抗⽣素",
+      "target": "⻘霉素",
+      "label": "相关"
+    },
+    {
+      "source": "⻘霉素",
+      "target": "布洛芬",
+      "label": "相关"
+    },
+    {
+      "source": "布洛芬",
+      "target": "肺炎",
+      "label": "相关"
+    },
+    {
+      "source": "肺炎",
+      "target": "发热",
+      "label": "相关"
+    },
+    {
+      "source": "肺炎",
+      "target": "头痛",
+      "label": "相关"
+    },
+    {
+      "source": "对⼄酰氨基酚",
+      "target": "布洛芬",
+      "label": "相关"
+    },
+    {
+      "source": "肺炎",
+      "target": "咳嗽",
+      "label": "相关"
+    },
+    {
+      "source": "胰岛素",
+      "target": "降压药",
+      "label": "相关"
+    }
+  ],
+  "meta": {
+    "total_chunks": 1,
+    "processed_chunks": 1,
+    "failed_chunks": 0,
+    "is_partial": false
+  }
+}

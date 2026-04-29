@@ -1,0 +1,7 @@
+{
+  "llm_model": "qwen2",
+  "ollama_base_url": "http://localhost:11434",
+  "timeout": 120,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "kg_model": "qwen3:0.6b"
+}

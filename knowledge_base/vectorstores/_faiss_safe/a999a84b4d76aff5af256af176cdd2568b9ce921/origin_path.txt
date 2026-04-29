@@ -1,0 +1,1 @@
+D:\code\KnowledgeRAG-GZHU-master\KnowledgeRAG-GZHU-master\RagBackend\local-KLB-files\神雕侠侣知识库\vectorstore

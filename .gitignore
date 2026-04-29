@@ -1,0 +1,55 @@
+# ── Python ──────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Node / Frontend ──────────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.local
+
+# ── Environment / Secrets ────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.venv
+
+# ── Build artifacts ──────────────────────────────────────────────
+*.manifest
+*.spec
+*.so
+*.dll
+*.dylib
+*.lib
+*.jar
+*.war
+*.ear
+*.iml
+*.class
+
+# ── OS / Editor ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
+logs/
+
+# Local database runtime data
+.local-mysql/data/
+
+# ── Script binaries (keep source, not compiled) ──────────────────
+*.exe

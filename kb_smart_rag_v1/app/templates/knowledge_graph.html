@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}知识图谱{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">知识库知识图谱</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="form-group mb-4">
+                <label for="kb_id">知识库ID</label>
+                <input type="text" id="kb_id" class="form-control" value="{{ kb_id }}" placeholder="请输入知识库ID">
+            </div>
+            <button id="loadGraph" class="btn btn-primary">加载知识图谱</button>
+            <button id="searchBtn" class="btn btn-secondary ml-2">搜索实体</button>
+            <input type="text" id="searchQuery" class="form-control d-inline-block w-25 ml-2" placeholder="搜索实体">
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div id="graph-container" style="width: 100%; height: 600px; border: 1px solid #ddd;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const kbIdInput = document.getElementById('kb_id');
+        const loadGraphBtn = document.getElementById('loadGraph');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchQuery = document.getElementById('searchQuery');
+        const graphContainer = document.getElementById('graph-container');
+        
+        // 初始化D3力导向图
+        let simulation, nodes, links, svg;
+        
+        function initGraph() {
+            // 清除现有内容
+            d3.select('#graph-container').selectAll('*').remove();
+            
+            // 创建SVG
+            svg = d3.select('#graph-container')
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%');
+            
+            // 创建力导向模拟
+            simulation = d3.forceSimulation()
+                .force('link', d3.forceLink().id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(graphContainer.clientWidth / 2, graphContainer.clientHeight / 2));
+        }
+        
+        function loadGraph() {
+            const kbId = kbIdInput.value.trim();
+            if (!kbId) {
+                alert('请输入知识库ID');
+                return;
+            }
+            
+            initGraph();
+            
+            // 加载知识图谱数据
+            fetch(`/api/knowledge-graph/visualize?kb_id=${kbId}&limit=50`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Graph data:', data);
+                    
+                    if (data.nodes.length === 0) {
+                        alert('该知识库暂无知识图谱数据');
+                        return;
+                    }
+                    
+                    // 创建连接线
+                    links = svg.append('g')
+                        .selectAll('line')
+                        .data(data.links)
+                        .enter()
+                        .append('line')
+                        .attr('stroke', '#999')
+                        .attr('stroke-width', 1);
+                    
+                    // 创建节点
+                    nodes = svg.append('g')
+                        .selectAll('circle')
+                        .data(data.nodes)
+                        .enter()
+                        .append('circle')
+                        .attr('r', 10)
+                        .attr('fill', d => {
+                            // 根据实体类型设置不同颜色
+                            const colorMap = {
+                                // 医疗领域实体颜色
+                                '疾病': '#ff6b6b',     // 红色
+                                '症状': '#4ecdc4',     // 青色
+                                '药物': '#45b7d1',     // 蓝色
+                                '治疗方法': '#96ceb4', // 绿色
+                                '身体部位': '#ffcc5c', // 黄色
+                                '检查项目': '#a8e6cf', // 浅绿色
+                                // 通用实体颜色
+                                'PERSON': '#ff6b6b',
+                                'ORG': '#4ecdc4',
+                                'LOC': '#45b7d1',
+                                'DATE': '#96ceb4',
+                                'TIME': '#ffcc5c',
+                                'MONEY': '#a8e6cf',
+                                'PERCENT': '#dcedc1',
+                                'FAC': '#ffd93d',
+                                'GPE': '#ff8b94'
+                            };
+                            return colorMap[d.type] || '#999';
+                        })
+                        .call(d3.drag()
+                            .on('start', dragstarted)
+                            .on('drag', dragged)
+                            .on('end', dragended));
+                    
+                    // 添加节点标签
+                    const labels = svg.append('g')
+                        .selectAll('text')
+                        .data(data.nodes)
+                        .enter()
+                        .append('text')
+                        .text(d => d.name)
+                        .attr('font-size', 12)
+                        .attr('dx', 15)
+                        .attr('dy', 5);
+                    
+                    // 添加关系标签
+                    const linkLabels = svg.append('g')
+                        .selectAll('text')
+                        .data(data.links)
+                        .enter()
+                        .append('text')
+                        .text(d => d.type)
+                        .attr('font-size', 10)
+                        .attr('fill', '#666');
+                    
+                    // 更新力导向模拟
+                    simulation
+                        .nodes(data.nodes)
+                        .on('tick', ticked);
+                    
+                    simulation.force('link')
+                        .links(data.links);
+                    
+                    function ticked() {
+                        links
+                            .attr('x1', d => d.source.x)
+                            .attr('y1', d => d.source.y)
+                            .attr('x2', d => d.target.x)
+                            .attr('y2', d => d.target.y);
+                        
+                        nodes
+                            .attr('cx', d => d.x)
+                            .attr('cy', d => d.y);
+                        
+                        labels
+                            .attr('x', d => d.x)
+                            .attr('y', d => d.y);
+                        
+                        linkLabels
+                            .attr('x', d => (d.source.x + d.target.x) / 2)
+                            .attr('y', d => (d.source.y + d.target.y) / 2);
+                    }
+                    
+                    function dragstarted(event, d) {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    }
+                    
+                    function dragged(event, d) {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    }
+                    
+                    function dragended(event, d) {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null;
+                        d.fy = null;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading graph data:', error);
+                    alert('加载知识图谱失败');
+                });
+        }
+        
+        function searchEntities() {
+            const kbId = kbIdInput.value.trim();
+            const query = searchQuery.value.trim();
+            
+            if (!kbId) {
+                alert('请输入知识库ID');
+                return;
+            }
+            
+            if (!query) {
+                alert('请输入搜索关键词');
+                return;
+            }
+            
+            // 搜索实体
+            fetch(`/api/knowledge-graph/search?kb_id=${kbId}&query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Search results:', data);
+                    
+                    if (data.results.length === 0) {
+                        alert('未找到相关实体');
+                        return;
+                    }
+                    
+                    // 显示搜索结果
+                    let resultText = '搜索结果:\n';
+                    data.results.forEach(entity => {
+                        resultText += `- ${entity.name} (${entity.type})\n`;
+                    });
+                    alert(resultText);
+                })
+                .catch(error => {
+                    console.error('Error searching entities:', error);
+                    alert('搜索实体失败');
+                });
+        }
+        
+        // 绑定事件
+        loadGraphBtn.addEventListener('click', loadGraph);
+        searchBtn.addEventListener('click', searchEntities);
+        
+        // 如果URL中有kb_id参数，自动加载
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlKbId = urlParams.get('kb_id');
+        if (urlKbId) {
+            kbIdInput.value = urlKbId;
+            loadGraph();
+        }
+    });
+</script>
+{% endblock %}
